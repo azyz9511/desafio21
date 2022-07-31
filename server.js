@@ -9,11 +9,11 @@ const cluster = require('cluster');
 const PORT = process.env.PORT || 8080;
 
 // importacion de los servicio chat y productos
-const chat = require('./services/chat');
-const productos = require('./services/productos');
+const chat = require('./src/services/chat');
+const productos = require('./src/services/productos');
 
 // importacion de routers
-const router = require('./routes/router');
+const router = require('./src/routes/router');
 
 // Inicializar express, http y socket.io
 const app = express();
@@ -24,7 +24,8 @@ const io = new IOServer(httpserver);
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 app.set('view engine','ejs');
-app.use(express.static("public"));
+app.set('views', __dirname + '/src/views');
+app.use(express.static("src/public"));
 app.use('/',router);
 
 // sockets
@@ -33,26 +34,23 @@ io.on('connection',async (socket) => {
     //mensaje de usuario conectado
     console.log('Usuario conectado'); 
 
-    // socket para productos con faker
-    socket.emit('productosFaker',productos.RandomProducts());
-
     // socket para productos
-    socket.on('guardar', data => {
-        console.log(data);
-        const products = productos.readProducts();
-        products.then(historialProductos => {
-            io.sockets.emit('historialGuardar',historialProductos);
-        });
-    });
-
-    const products = productos.readProducts();
-    products.then(historialProductos => {
-        if(historialProductos !== false){
-            socket.emit('historialProductos',historialProductos);
-        }else{
-            console.log('La tabla no existe');
+    socket.on('guardar', async data => {
+        try{
+            console.log(data);
+            const products = await productos.readProducts();
+            io.sockets.emit('historialGuardar',products);
+        }catch(e){
+            console.log(`Ha ocurrido el siguiente error: ${e}`);
         }
     });
+
+    try{
+        const products = await productos.readProducts();
+            socket.emit('historialProductos',products);
+    }catch (e){
+        console.log(`Ha ocurrido el siguiente error: ${e}`);
+    }
 
     //socket para chat
     socket.on('nuevoMensaje',async data => {

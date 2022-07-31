@@ -8,12 +8,13 @@ formProductos.addEventListener('submit',(e) => {
     e.preventDefault();
 
     const datos = {
-        'title': formProductos[0].value,
-        'price': formProductos[1].value,
-        'thumbnail': formProductos[2].value
+        'id': formProductos[0].value,
+        'title': formProductos[1].value,
+        'price': formProductos[2].value,
+        'thumbnail': formProductos[3].value
     }
     
-    fetch('/', {
+    fetch('/productos', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -21,19 +22,11 @@ formProductos.addEventListener('submit',(e) => {
         },
         body: JSON.stringify(datos)
     })
-    .then( response => {
-        if(response.ok) {
-            setTimeout(() => socket.emit('guardar','guardado con exito'),500);
+
+     setTimeout(() => socket.emit('guardar','guardado con exito'),500);
             socket.on('historialGuardar', data => {
-                if(data.length !== 0){
                     render(data)
-                }
             });
-        }
-     })
-     .catch( error => {
-        console.log(error);
-     });
 
     formProductos.reset();
 
@@ -54,36 +47,18 @@ function render(data) {
         const tableComplete = table + html;
         document.getElementById('productos').innerHTML = tableComplete;
     }else{
-        document.getElementById('productos').innerHTML = '';
+        const noProducts = `<tr>
+                                <td>
+                                    <h3 class="text-danger"> No se encontraron productos </h3>
+                                </td>
+                            </tr>`;
+        document.getElementById('productos').innerHTML = noProducts;
     }
 }
 
 socket.on('historialProductos', data => {
     render(data)
 });
-
-// tabla productos faker
-// ---------------------------------------------------------------------------------------------------------------------------------------
-
-socket.on('productosFaker', data => {
-    render(data);
-});
-
-function render(data) {
-    const table = `<tr><th><h5>Nombre</h5></th><th><h5>Precio</h5></th><th><h5>Foto</h5></th></tr>`;
-    const html = data
-    .map((elem, index) => {
-        return `<tr>
-        <td>${elem.nombre}</td>
-        <td>${elem.precio}</td>
-        <td><img width="50" src="${elem.foto}"></td>
-        </tr>`
-    })
-    .join(' ');
-    const tableComplete = table + html;
-    document.getElementById('productos').innerHTML = tableComplete;
-    
-}
 
 // chat
 // -----------------------------------------------------------------------------------------------------------------------------------------
@@ -112,7 +87,7 @@ formChat.addEventListener('submit',(e) => {
         const html = data
         .map((elem, index) => {
             return `<div>
-            <b style='color:blue;'>${elem.author.id}</b>
+            <b style='color:blue;'>${elem.id}</b>
             <span style='color:brown'>[${elem.fyh}] : </span>
             <i style='color:green'>${elem.text}</i>
             </div>`
@@ -128,7 +103,7 @@ socket.on('historialChat', data => {
         const html = data
         .map((elem, index) => {
             return `<div>
-            <b style='color:blue;'>${elem.author.id}</b>
+            <b style='color:blue;'>${elem.id}</b>
             <span style='color:brown'>[${elem.fyh}] : </span>
             <i style='color:green'>${elem.text}</i>
             </div>`

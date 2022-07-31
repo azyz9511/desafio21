@@ -1,5 +1,5 @@
 const bCrypt = require('bcrypt');
-const userDB = require('../database/usuarios');
+const userDB = require('../database/DAO/usuarios');
 
 function validarPass(user, password){
     return bCrypt.compareSync(password, user.password);

@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const usuarioSchema = require('../database/models/usuarioSchema');
+const mensajeSchema = require('../models/mensajeSchema');
 require('dotenv').config();
 
-class Usuario{
+class Chat{
     
     constructor(){
         
@@ -20,22 +20,22 @@ class Usuario{
         }
     }
     
-    async addNewUser(newUser){
+    async addNewMessage(mensaje){
         try{
             await this.connectDB();
-            await usuarioSchema.create(newUser);
+            await mensajeSchema.create(mensaje);
             mongoose.disconnect();
         }catch (e){
             console.log(`Ha ocurrido el siguiente error: ${e}`);
         }
     }
     
-    async findOneUser(username){
+    async getAllMessages(){
         try{
             await this.connectDB();
-            const user = await usuarioSchema.findOne({email: username});
+            const data = await mensajeSchema.find();
             mongoose.disconnect();
-            return user;
+            return data;
         }catch (e){
             console.log(`Ha ocurrido el siguiente error: ${e}`);
         }
@@ -43,6 +43,6 @@ class Usuario{
 
 }
 
-const userDB = new Usuario();
+const chatDB = new Chat();
 
-module.exports = userDB;
+module.exports = chatDB;
